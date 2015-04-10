@@ -3,10 +3,13 @@ package com.gokhanozg.wordhasher;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Set;
 import java.util.concurrent.Future;
 
 class WHUtils {
+
+	private static final Locale TR = new Locale("TR", "tr");
 
 	protected static <E> List<E> convertSetToList(Set<E> set) {
 		if (set == null)
@@ -54,5 +57,35 @@ class WHUtils {
 					index++;
 			}
 		}
+	}
+
+	public static boolean isSearchResult(String keyword, String word) {
+		if (word == null || keyword == null)
+			return false;
+		word = word.toLowerCase(TR);
+		keyword = keyword.toLowerCase(TR);
+		return word.contains(keyword);
+	}
+
+	public static int generateHashCode(String s) {
+		if (s == null)
+			return 0;
+		return s.toLowerCase(TR).hashCode();
+	}
+
+	public static boolean equalStrings(String s1, String s2) {
+		if (s1 == null || s2 == null)
+			return false;
+		s1 = s1.toLowerCase(TR);
+		s2 = s2.toLowerCase(TR);
+		return s1.equals(s2);
+	}
+
+	public static boolean containsIgnoreCase(String possibleSearchSet, String keyword) {
+		if (possibleSearchSet == null || keyword == null)
+			return false;
+		possibleSearchSet = possibleSearchSet.toLowerCase(TR);
+		keyword = keyword.toLowerCase(TR);
+		return possibleSearchSet.contains(keyword);
 	}
 }

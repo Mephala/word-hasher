@@ -24,9 +24,9 @@ public class WordHasher {
 	private final Set<String> allDistinctPossibleSearches;
 	private final static int DEFAULT_HASH_LIMIT = 5;
 	private final int hashLimit;
-	private final ExecutorService keywordDividerExecutor;
-	private final int KEYWORD_DIVIDER_THREAD_COUNT = 8;
-	private final int KEYWORD_SUBLIST_AMOUNT = KEYWORD_DIVIDER_THREAD_COUNT;
+	private final ExecutorService hasherExecutor;
+	private final int HASHER_WORKER_THREADS = 8;
+	private final int KEYWORD_SUBLIST_AMOUNT = HASHER_WORKER_THREADS;
 
 	/**
 	 * Constructs hasher for given list. Expensive operation. For instance ( List = {"Gokhan Ozgozen" , "Sabanci University"} , threshold = 2 ) construction hashes all keywords with 2 character at
@@ -45,7 +45,7 @@ public class WordHasher {
 		this.keywordToSearchResultMap = new HashMap<String, Set<String>>();
 		this.allDistinctPossibleSearches = new HashSet<String>();
 		this.searchSet = new HashSet<String>();
-		this.keywordDividerExecutor = Executors.newFixedThreadPool(KEYWORD_DIVIDER_THREAD_COUNT);
+		this.hasherExecutor = Executors.newFixedThreadPool(HASHER_WORKER_THREADS);
 		if (wordList != null) {
 			for (String word : wordList) {
 				searchSet.add(word);
@@ -62,9 +62,7 @@ public class WordHasher {
 	}
 
 	private void startPresearch() {
-		long prepareStart = System.currentTimeMillis();
 		prepareKeywords();
-		long prepareDiffer = (System.currentTimeMillis() - prepareStart);
 		completeSearchResults();
 	}
 
@@ -72,6 +70,8 @@ public class WordHasher {
 		for (String keyword : allDistinctPossibleSearches) {
 			Set<String> resultStringSetForKeyword = new HashSet<String>();
 			for (String possibleSearchSet : searchSet) {
+				// if (possibleSearchSet != null && WHUtils.containsIgnoreCase(possibleSearchSet, keyword))
+				// resultStringSetForKeyword.add(possibleSearchSet);
 				if (possibleSearchSet != null && possibleSearchSet.contains(keyword))
 					resultStringSetForKeyword.add(possibleSearchSet);
 			}
@@ -85,7 +85,7 @@ public class WordHasher {
 		List<Future<Set<String>>> dividerFutures = new ArrayList<Future<Set<String>>>();
 		for (List<String> list : dividedSearchList) {
 			WordDivider wd = new WordDivider(list, hashLimit);
-			dividerFutures.add(keywordDividerExecutor.submit(wd));
+			dividerFutures.add(hasherExecutor.submit(wd));
 		}
 		WHUtils.waitFutureList(dividerFutures);
 		for (Future<Set<String>> future : dividerFutures) {
