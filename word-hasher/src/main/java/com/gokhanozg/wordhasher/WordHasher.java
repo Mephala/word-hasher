@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
@@ -27,6 +28,8 @@ public class WordHasher {
 	private final ExecutorService hasherExecutor;
 	private final int HASHER_WORKER_THREADS = 8;
 	private final int KEYWORD_SUBLIST_AMOUNT = HASHER_WORKER_THREADS;
+	private final Locale locale;
+	private final static Locale DEFAULT_LOCALE = new Locale("TR", "tr");
 
 	/**
 	 * Constructs hasher for given list. Expensive operation. For instance ( List = {"Gokhan Ozgozen" , "Sabanci University"} , threshold = 2 ) construction hashes all keywords with 2 character at
@@ -40,6 +43,10 @@ public class WordHasher {
 	 * 
 	 */
 	public WordHasher(List<String> wordList, int hashLimit) {
+		this(wordList, hashLimit, null);
+	}
+
+	public WordHasher(List<String> wordList, int hashLimit, Locale locale) {
 		super();
 		this.hashLimit = hashLimit;
 		this.keywordToSearchResultMap = new HashMap<String, Set<String>>();
@@ -52,6 +59,10 @@ public class WordHasher {
 			}
 			startPresearch();
 		}
+		if (locale == null)
+			this.locale = DEFAULT_LOCALE;
+		else
+			this.locale = locale;
 	}
 
 	/**
@@ -70,8 +81,6 @@ public class WordHasher {
 		for (String keyword : allDistinctPossibleSearches) {
 			Set<String> resultStringSetForKeyword = new HashSet<String>();
 			for (String possibleSearchSet : searchSet) {
-				// if (possibleSearchSet != null && WHUtils.containsIgnoreCase(possibleSearchSet, keyword))
-				// resultStringSetForKeyword.add(possibleSearchSet);
 				if (possibleSearchSet != null && possibleSearchSet.contains(keyword))
 					resultStringSetForKeyword.add(possibleSearchSet);
 			}
@@ -102,8 +111,22 @@ public class WordHasher {
 	public Set<String> search(String keyword) {
 		Set<String> clonedSet = new HashSet<String>();
 		Set<String> answerSet = keywordToSearchResultMap.get(keyword);
+		Set<String> lowerCaseAnswerSet = keywordToSearchResultMap.get(keyword.toLowerCase(locale));
+		Set<String> upperCaseAnswerSet = keywordToSearchResultMap.get(keyword.toUpperCase(locale));
 		if (answerSet != null) {
 			for (String answer : answerSet) {
+				if (answer != null)
+					clonedSet.add(answer);
+			}
+		}
+		if (lowerCaseAnswerSet != null) {
+			for (String answer : lowerCaseAnswerSet) {
+				if (answer != null)
+					clonedSet.add(answer);
+			}
+		}
+		if (upperCaseAnswerSet != null) {
+			for (String answer : upperCaseAnswerSet) {
 				if (answer != null)
 					clonedSet.add(answer);
 			}
