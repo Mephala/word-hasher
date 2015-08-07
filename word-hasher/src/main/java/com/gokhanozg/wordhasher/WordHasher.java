@@ -33,7 +33,7 @@ public class WordHasher {
 
 	/**
 	 * Constructs hasher for given list. Expensive operation. For instance ( List = {"Gokhan Ozgozen" , "Sabanci University"} , threshold = 2 ) construction hashes all keywords with 2 character at
-	 * most. Like : "Go" , "ok", "ha" , "an"
+	 * most. Like : "Go" , "ok", "ha" , "an". Please use with care, terrible performance after certain hashLimits.
 	 * 
 	 * @param wordList
 	 *            List of strings containing words in which you want to search through later.
@@ -66,7 +66,8 @@ public class WordHasher {
 	}
 
 	/**
-	 * Call {@link #WordHasher(wordList,hashLimit) constructor with hashlimit } if you need to configure its search speed. Be careful, this class is very expensive in terms of memory usage.
+	 * Call {@link #WordHasher(wordList,hashLimit) constructor with hashlimit } if you need to configure its search speed. Be careful, this class is very expensive in terms of memory usage. It uses
+	 * highest possible
 	 */
 	public WordHasher(List<String> wordList) {
 		this(wordList, DEFAULT_HASH_LIMIT);
